@@ -1,0 +1,9 @@
+# 忽略模型权重和检查点
+smollm2-*/
+*.safetensors
+*.bin
+checkpoint-*/
+
+#忽略缓存
+.cache/
+__pycache__/
