@@ -4,6 +4,10 @@ smollm2-*/
 *.bin
 checkpoint-*/
 
-#忽略缓存
+# 忽略缓存
 .cache/
 __pycache__/
+
+# 忽略图片和 Windows 标记文件
+*.png
+*:Zone.Identifier
