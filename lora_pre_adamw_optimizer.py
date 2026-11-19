@@ -27,7 +27,7 @@ class LoRAPreAdamW(Optimizer):
             for p in group['params']:
                 if p.grad is None:
                     continue
-                grad = p.grad.to(torch.float32)  # <--- 加上 .to(torch.float32)
+                grad = p.grad.to(torch.float32)  # 我们需要float32
                 if grad.is_sparse:
                     raise RuntimeError('LoRAPreAdamW does not support sparse gradients')
 
@@ -55,7 +55,7 @@ class LoRAPreAdamW(Optimizer):
                 state['step'] += 1
                 step = state['step']
 
-                # 【新增】如果是第一步，用梯度做 SVD 初始化，彻底解决冷启动
+                # 为解决 cold-start，第一步我们用svd
                 if step == 1 and len(p.shape) == 2:
                     U, S, V = torch.svd_lowrank(grad, q=r)
                     state['m_B'] = (U @ torch.diag(S)).to(torch.float32)
@@ -88,11 +88,21 @@ class LoRAPreAdamW(Optimizer):
                 # 计算矩阵求逆所需的单位矩阵
                 I_r = torch.eye(r, device=p.device, dtype=torch.float32)
                 
-                # 一阶动量更新 (论文公式 11)
+                                # 一阶动量更新 (论文公式 11)
                 try:
-                    # 使用正则化求逆（对应论文防止矩阵奇异）
-                    temp_B = grad @ m_A.t() @ torch.linalg.inv(m_A @ m_A.t() + eps * I_r)
-                    temp_A = torch.linalg.inv(m_B.t() @ m_B + eps * I_r) @ m_B.t() @ grad
+                    # 【博导要求新增】：提取正则化矩阵并计算特征值
+                    M_A = m_A @ m_A.t() + eps * I_r
+                    M_B = m_B.t() @ m_B + eps * I_r
+                    
+                    # 每 50 步打印一次特征值
+                    if step % 50 == 0:
+                        eig_A = torch.linalg.eigvalsh(M_A)
+                        eig_B = torch.linalg.eigvalsh(M_B)
+                        print(f"Step {step} | M_A max_eig: {eig_A.max().item():.4f}, min_eig: {eig_A.min().item():.6f} | M_B max_eig: {eig_B.max().item():.4f}, min_eig: {eig_B.min().item():.6f}")
+
+                    # 使用正则化求逆
+                    temp_B = grad @ m_A.t() @ torch.linalg.inv(M_A)
+                    temp_A = torch.linalg.inv(M_B) @ m_B.t() @ grad
                 except RuntimeError:
                     continue  # 如果矩阵奇异则跳过该步
 

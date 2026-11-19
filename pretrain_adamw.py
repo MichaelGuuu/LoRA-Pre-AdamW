@@ -33,7 +33,7 @@ data_collator = DataCollatorForLanguageModeling(tokenizer=tokenizer, mlm=False)
 # 6. 训练参数
 training_args = TrainingArguments(
     output_dir=output_dir,
-    max_steps=5000,                      # 再跑5000步看看效果
+    max_steps=5000,                      # 先跑2000步，再跑5000步看看效果
     per_device_train_batch_size=4,       # 6GB显存，设4比较安全
     gradient_accumulation_steps=4,
     learning_rate=5e-4,                  # 预训练学习率
