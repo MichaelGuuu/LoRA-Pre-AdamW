@@ -2,10 +2,18 @@ import torch
 torch.cuda.reset_peak_memory_stats()
 from datasets import load_dataset
 from transformers import AutoConfig, AutoModelForCausalLM, AutoTokenizer, Trainer, TrainingArguments, DataCollatorForLanguageModeling
+import sys
+
+# ---- step budget from CLI:  python pretrain_adamw.py 2000 | 5000 ----
+STEPS = int(sys.argv[1]) if len(sys.argv) > 1 else 2000
+if STEPS not in (2000, 5000):
+    raise SystemExit("usage: python pretrain_adamw.py [2000|5000]")
+WARMUP = 200 if STEPS <= 2000 else 500
+SAVE_EVERY = 1000 if STEPS <= 2000 else 2500
 
 # 1. 设置
 model_name = "HuggingFaceTB/SmolLM2-135M"
-output_dir = "./smollm2-pretrained-adamw-5000steps"     # 2000步；5000步
+output_dir = f"./smollm2-pretrained-adamw-{STEPS}steps"     # STEPS = 2000步；5000步
 device = "cuda" if torch.cuda.is_available() else "cpu"
 print(f"Using device: {device}")
 
@@ -33,15 +41,15 @@ data_collator = DataCollatorForLanguageModeling(tokenizer=tokenizer, mlm=False)
 # 6. 训练参数
 training_args = TrainingArguments(
     output_dir=output_dir,
-    max_steps=5000,                      # 先跑2000步，再跑5000步看看效果
-    per_device_train_batch_size=4,       # 6GB显存，设4比较安全
+    max_steps=STEPS,                    # 来自命令行；默认 5000
+    per_device_train_batch_size=4,      # 6GB显存，设4比较安全
     gradient_accumulation_steps=4,
-    learning_rate=5e-4,                  # 预训练学习率
-    warmup_steps=500,                    # 200步对应2000步，500步对应5000步
+    learning_rate=5e-4,                 # 预训练学习率
+    warmup_steps=WARMUP,                # 200步对应2000步，500步对应5000步
     logging_steps=10,
-    save_steps=2500,                     # 1000只在2000步时保存一次检查点；2500只在5000步时保存一次
-    save_total_limit=1,                  # 只保留最近 1 个检查点，旧的自动删除
-    bf16=True,                           # 开启BF16节省显存
+    save_steps=SAVE_EVERY,              # 1000只在2000步时保存一次检查点；2500只在5000步时保存一次
+    save_total_limit=1,                 # 只保留最近 1 个检查点，旧的自动删除
+    bf16=True,                          # 开启BF16节省显存
     report_to="none",
 )
 
