@@ -24,10 +24,10 @@ the unreleased official code) and compared on pre-training and fine-tuning of `H
 
 | Optimizer | ARC-Easy | TQA MC1 | TQA MC2 | Peak mem (MB) | Δ mem vs AdamW | Final loss |
 |---|---|---|---|---|---|---|
-| AdamW | **45.0** | 24.0 | 43.1 | 1321.1 | — | 1.124 |
-| LoRA-Pre-AdamW | 44.0 | 25.0 | 43.1 | 1125.8 | **−14.8%** | **1.030** |
-| Muon | 40.0 | **33.0** | **52.5** | 1111.7 | −15.8% | 1.595 |
-| LoRA-Pre-Muon | 36.0 | 30.0 | 51.2 | **934.6** | **−29.3%** | 1.572 |
+| AdamW | **45.0%** | 24.0% | 43.1% | 1321.1 | — | 1.124 |
+| LoRA-Pre-AdamW | 44.0% | 25.0% | 43.1% | 1125.8 | **−14.8%** | **1.030** |
+| Muon | 40.0% | **33.0%** | **52.5%** | 1111.7 | −15.8% | 1.595 |
+| LoRA-Pre-Muon | 36.0% | 30.0% | 51.2% | **934.6** | **−29.3%** | 1.572 |
 
 **Pre-training (2000 steps).** The loss column is the trainer's `train_loss` — the mean of the per-step batch losses
 over the entire run.
@@ -41,11 +41,11 @@ over the entire run.
 
 What the numbers support:
 
-- **Fine-tuning is where low-rank momentum compression pays off.** LoRA-Pre-AdamW costs 1.0 point of ARC-Easy
-  (45.0 → 44.0), gains 1.0 point of TruthfulQA MC1, holds MC2 exactly (43.1 → 43.1), and saves **14.8%** peak memory.
+- **Fine-tuning is where low-rank momentum compression pays off.** LoRA-Pre-AdamW costs 1.0% point of ARC-Easy
+  (45.0% → 44.0%), gains 1.0% point of TruthfulQA MC1, holds MC2 exactly (43.1% → 43.1%), and saves **14.8%** peak memory.
   LoRA-Pre-Muon saves **29.3%** and lands at 934.6 MB, below the 1 GB barrier.
-- **Muon trades common sense for calibration.** It gives up 5.0 points of ARC-Easy but gains 9.0 points of MC1 and
-  9.4 points of MC2 — the largest calibration gain of any optimizer tested — while costing 5.2% *more* memory than
+- **Muon trades common sense for calibration.** It gives up 5.0% points of ARC-Easy but gains 9.0% points of MC1 and
+  9.4% points of MC2 — the largest calibration gain of any optimizer tested — while costing 5.2% *more* memory than
   AdamW during pre-training.
 - **Pre-training is where low-rank hurts.** LoRA-Pre-AdamW saves 10.0% memory, but its run-average `train_loss` is
   0.357 nats worse than AdamW (6.614 vs. 6.257); the per-step gap at the end of a 2000-step run is 0.562 nats and
@@ -58,9 +58,9 @@ What the numbers support:
 ![Fine-tuning capability comparison](figures/finetune_accuracy_combined.png)
 
 Per-benchmark breakdown that makes the two axes of the trade-off visible. The AdamW family dominates common-sense
-reasoning (ARC-Easy 45.0 / 44.0); the Muon family dominates TruthfulQA (MC1 33.0 / 30.0, MC2 52.5 / 51.2). Low-rank
-compression leaves MC2 bit-for-bit unchanged for the AdamW pair (43.1 → 43.1) and costs 1.3 points for the Muon pair
-(52.5 → 51.2).
+reasoning (ARC-Easy 45.0% / 44.0%); the Muon family dominates TruthfulQA (MC1 33.0% / 30.0%, MC2 52.5% / 51.2%). Low-rank
+compression leaves MC2 bit-for-bit unchanged for the AdamW pair (43.1% → 43.1%) and costs 1.3% points for the Muon pair
+(52.%5 → 51.2%).
 
 ![Fine-tuning loss and peak memory](figures/finetune_family.png)
 
@@ -73,8 +73,8 @@ into ARC-Easy accuracy — evidence that in-distribution loss and downstream acc
 ![Pareto Frontier](figures/pareto_frontier.png)
 
 All four configurations are non-dominated: each buys accuracy with memory and none is beaten on both axes at once.
-The practically relevant point is LoRA-Pre-AdamW — 44.0 ARC-Easy for 1125.8 MB versus AdamW's 45.0 for 1321.1 MB,
-i.e. **14.8% less memory for one accuracy point**. LoRA-Pre-Muon reaches 934.6 MB (29.3% below AdamW) at 36.0
+The practically relevant point is LoRA-Pre-AdamW — 44.0% ARC-Easy for 1125.8 MB versus AdamW's 45.0% for 1321.1 MB,
+i.e. **14.8% less memory for one accuracy point**. LoRA-Pre-Muon reaches 934.6 MB (29.3% below AdamW) at 36.0%
 ARC-Easy.
 
 ### 3. Pre-training — loss trajectory and memory
@@ -142,9 +142,9 @@ and the loss would diverge to `NaN`.
   alone would suggest, and the run-average gap (+0.357) is *smaller* than the gap at the end of training (+0.562) — the
   average is dominated by the mid-run region, where the two curves are closest (~0.30). A last-25% mean (6.268 for
   LoRA-Pre-AdamW) or a held-out evaluation would be the sharper instrument and is not reported.
-- **Single seed per configuration.** No error bars, so a ±1 point difference on ARC-Easy (45.0 vs. 44.0) is within
-  plausible seed variance rather than a measured effect. The 5–9 point gaps between the AdamW and Muon families are
-  large enough to be meaningful; the 1 point gap is not.
+- **Single seed per configuration.** No error bars, so a ±1% point difference on ARC-Easy (45.0% vs. 44.0%) is within
+  plausible seed variance rather than a measured effect. The 5–9% point gaps between the AdamW and Muon families are
+  large enough to be meaningful; the 1% point gap is not.
 - **Scale.** SmolLM2-135M, ≤ 5000 steps, one 6 GB GPU. The optimizer state is small relative to activations at this
   width, so relative memory savings will differ at larger widths and longer runs.
 - **Stability evidence is partly constructive.** The eigenvalue plot contains only runs *with* the λI term, all of
@@ -225,4 +225,4 @@ python plot_ft_accuracy.py
 
 ## Citation
 
-Zhengbo Wang et al. "Taming Momentum: Rethinking Optimizer States Through Low-Rank Approximation." ICLR 2026.
+[Zhengbo Wang et al. "Taming Momentum: Rethinking Optimizer States Through Low-Rank Approximation." ICLR 2026.](https://proceedings.iclr.cc/paper_files/paper/2026/hash/2f4b6febe0b70805c3be75e5d6a66918-Abstract-Conference.html)
