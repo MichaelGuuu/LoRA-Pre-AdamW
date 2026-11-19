@@ -1,4 +1,6 @@
 import matplotlib.pyplot as plt
+import os
+os.makedirs('figures', exist_ok=True)
 
 data = {
     'AdamW': (1321.1, 45.0),
@@ -33,5 +35,5 @@ plt.grid(True, linestyle='--', alpha=0.6, zorder=0)
 plt.text(1300, 32, "Lower Memory\n& Higher Accuracy\nis Better", fontsize=12, color='red', fontweight='bold', ha='center')
 
 plt.tight_layout()
-plt.savefig('pareto_frontier.png', dpi=300)
+plt.savefig('figures/pareto_frontier.png', dpi=300)
 print("图已保存为 pareto_frontier.png")

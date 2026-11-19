@@ -1,5 +1,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
+import os
+os.makedirs('figures', exist_ok=True)
 
 # 数据准备
 labels = ['AdamW', 'LoRA-Pre\nAdamW', 'Standard\nMuon', 'LoRA-Pre\nMuon']
@@ -41,5 +43,5 @@ autolabel(rects2)
 autolabel(rects3)
 
 plt.tight_layout()
-plt.savefig('finetune_accuracy_combined.png', dpi=300)
+plt.savefig('figures/finetune_accuracy_combined.png', dpi=300)
 print("图已保存为 finetune_accuracy_combined.png")

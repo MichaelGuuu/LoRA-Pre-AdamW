@@ -5,7 +5,7 @@ from transformers import AutoConfig, AutoModelForCausalLM, AutoTokenizer, Traine
 
 # 1. 设置
 model_name = "HuggingFaceTB/SmolLM2-135M"
-output_dir = "./smollm2-pretrained-lora-pre-rank64"
+output_dir = "./smollm2-pretrained-lora-pre-rank16"
 device = "cuda" if torch.cuda.is_available() else "cpu"
 print(f"Using device: {device}")
 
@@ -52,7 +52,7 @@ lora_pre_adamw_optimizer = LoRAPreAdamW(
     model.parameters(), 
     lr=5e-4,           # 和原来预训练保持一致
     weight_decay=0.0,  # 和原来保持一致
-    rank=64            # 压缩秩，先设16，以后可以调
+    rank=16            # 压缩秩，先设16，再测32、64
 )
 
 # 8. 创建 Trainer，通过 optimizers 参数传入自定义优化器

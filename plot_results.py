@@ -1,5 +1,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
+import os
+os.makedirs('figures', exist_ok=True)
 
 # 设置画图风格 (兼容不同版本matplotlib)
 try:
@@ -27,15 +29,21 @@ plt.plot(steps_2000, lora_2000, label='LoRA-Pre-2000 Steps', marker='s', color='
 plt.plot(steps_5000, adamw_5000, label='AdamW-5000 Steps', marker='d', color='#d62728', linewidth=2)
 plt.plot(steps_5000, lora_5000, label='LoRA-Pre-5000 Steps', marker='^', color='#2ca02c', linewidth=2)
 
+# --- 2000 步两轮的 train_loss（整轮平均），只画在 0~2000 区间 ---
+plt.hlines(6.257, 0, 2000, colors='#1f77b4', linestyles='--', linewidth=1.5, zorder=4)
+plt.hlines(6.614, 0, 2000, colors='#ff7f0e', linestyles='--', linewidth=1.5, zorder=4)
+plt.text(2020, 6.257, '  AdamW run-avg 6.257', color='#1f77b4', fontsize=9, va='center')
+plt.text(2020, 6.614, '  LoRA-Pre run-avg 6.614', color='#ff7f0e', fontsize=9, va='center')
+
 plt.title('Training Loss vs. Steps (Pre-training SmolLM2-135M)', fontsize=14)
 plt.xlabel('Training Steps', fontsize=12)
-plt.ylabel('Training Loss', fontsize=12)
+plt.ylabel('Training Loss (10-step interval mean)', fontsize=12)
 plt.legend(fontsize=11)
 plt.grid(True, linestyle='--', alpha=0.7)
 
 # 保存图片
 plt.tight_layout()
-plt.savefig('loss_comparison.png', dpi=300)
+plt.savefig('figures/loss_comparison.png', dpi=300)
 print("图1已保存为 loss_comparison.png")
 
 # ==================== 图2：峰值显存柱状图 ====================
@@ -60,5 +68,5 @@ plt.ylim(0, 4500)
 
 # 保存图片
 plt.tight_layout()
-plt.savefig('memory_comparison.png', dpi=300)
+plt.savefig('figures/memory_comparison.png', dpi=300)
 print("图2已保存为 memory_comparison.png")

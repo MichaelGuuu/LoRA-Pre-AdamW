@@ -1,5 +1,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
+import os
+os.makedirs('figures', exist_ok=True)
 
 # 设置画图风格
 try:
@@ -25,8 +27,8 @@ plt.plot(steps, adamw_min_eigs, marker='s', markersize=10, linewidth=3,
          color='#1f77b4', label='LoRA-Pre-AdamW (Min Eigenvalue)')
 
 # 3. 标出安全底线 (eps = 1e-6)
-plt.axhline(y=1e-6, color='black', linestyle='--', linewidth=2, label='Safety Floor (\(\lambda = 10^{-6}\))')
-
+plt.axhline(y=1e-6, color='black', linestyle='--', linewidth=2,
+            label=r'Safety Floor ($\lambda = 10^{-6}$)')
 # 4. 加上注解
 plt.text(130, 1.5e-6, "Without + λI, values drop to 0\n-> Matrix Singular -> NaN Loss", 
          fontsize=12, color='black', fontweight='bold',
@@ -42,5 +44,5 @@ plt.legend(fontsize=12, loc='upper right')
 plt.grid(True, linestyle=':', alpha=0.7)
 
 plt.tight_layout()
-plt.savefig('eigenvalue_stability.png', dpi=300)
+plt.savefig('figures/eigenvalue_stability.png', dpi=300)
 print("特征值稳定性图已保存为 eigenvalue_stability.png")
