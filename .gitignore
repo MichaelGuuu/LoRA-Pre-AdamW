@@ -11,3 +11,10 @@ __pycache__/
 # 忽略图片和 Windows 标记文件
 *.png
 *:Zone.Identifier
+
+# 结果图表需要入库
+!figures/*.png
+
+# 实验日志、权重不入库
+*.log
+adamw_eigen.log
